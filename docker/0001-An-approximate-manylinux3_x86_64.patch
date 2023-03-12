@@ -26,7 +26,6 @@ index 56b42ff..ba02a29 100755
 -docker system prune -f
 +docker build --rm -t manylinux3_x86_64 -f docker/Dockerfile-$PLATFORM docker/
 diff --git a/docker/Dockerfile-x86_64 b/docker/Dockerfile-x86_64
-index 0c2f4b1..be290c1 100644
 --- a/docker/Dockerfile-x86_64
 +++ b/docker/Dockerfile-x86_64
 @@ -1,15 +1,15 @@
@@ -50,7 +49,6 @@ index 0c2f4b1..be290c1 100644
  
  ENV SSL_CERT_FILE=/opt/_internal/certs.pem
 diff --git a/docker/build_scripts/build.sh b/docker/build_scripts/build.sh
-index 219703a..b05615b 100755
 --- a/docker/build_scripts/build.sh
 +++ b/docker/build_scripts/build.sh
 @@ -1,4 +1,5 @@
@@ -75,7 +73,7 @@ index 219703a..b05615b 100755
  # Get build utilities
  source $MY_DIR/build_utils.sh
  
-@@ -48,59 +40,42 @@ cp $MY_DIR/epel-release-5-4.noarch.rpm .
+@@ -48,59 +40,45 @@ cp $MY_DIR/epel-release-5-4.noarch.rpm .
  check_sha256sum epel-release-5-4.noarch.rpm $EPEL_RPM_HASH
  
  # Dev toolset (for LLVM and other projects requiring C++11 support)
@@ -86,7 +84,10 @@ index 219703a..b05615b 100755
 -rm -f epel-release-5*.rpm
 +yum -y install centos-release-scl
 +yum-config-manager --enable rhel-server-rhscl-7-rpms
-+yum -y install devtoolset-4
++wget ftp://ftp.pbone.net/mirror/vault.centos.org/7.4.1708/sclo/x86_64/rh/devtoolset-4/devtoolset-4-4.1-3.sc1.el7.x86_64.rpm
++wget ftp://ftp.pbone.net/mirror/ftp5.gwdg.de/pub/opensuse/repositories/home%3A/jnweiger%3A/octest%3A/testpilot/CentOS_7/x86_64/devtoolset-4-centos7-x86-64-0.1_oc20170210-4.3.x86_64.rpm
++yum -y install devtoolset-4-centos7-x86-64-0.1_oc20170210-4.3.x86_64.rpm
++yum -y install devtoolset-4-4.1-3.sc1.el7.x86_64.rpm
 +sed -i 's| \. scl_source.*$| echo|' /opt/rh/devtoolset-4/enable
 +source /opt/rh/devtoolset-4/enable
  
@@ -152,7 +153,7 @@ index 219703a..b05615b 100755
  # Install a more recent SQLite3
  curl -fsSLO $SQLITE_AUTOCONF_DOWNLOAD_URL/$SQLITE_AUTOCONF_VERSION.tar.gz
  check_sha256sum $SQLITE_AUTOCONF_VERSION.tar.gz $SQLITE_AUTOCONF_HASH
-@@ -132,9 +107,6 @@ ln -s $($PY36_BIN/python -c 'import certifi; print(certifi.where())') \
+@@ -132,9 +110,6 @@ ln -s $($PY36_BIN/python -c 'import certifi; print(certifi.where())') \
  # Dockerfiles:
  export SSL_CERT_FILE=/opt/_internal/certs.pem
  
@@ -162,7 +163,7 @@ index 219703a..b05615b 100755
  # Install patchelf (latest with unreleased bug fixes)
  curl -fsSL -o patchelf.tar.gz https://github.com/NixOS/patchelf/archive/$PATCHELF_VERSION.tar.gz
  check_sha256sum patchelf.tar.gz $PATCHELF_HASH
-@@ -154,7 +126,7 @@ yum -y erase \
+@@ -154,7 +129,7 @@ yum -y erase \
      hicolor-icon-theme \
      libX11 \
      wireless-tools \
@@ -172,10 +173,9 @@ index 219703a..b05615b 100755
  yum -y clean all > /dev/null 2>&1
  yum list installed
 diff --git a/docker/build_scripts/build_env.sh b/docker/build_scripts/build_env.sh
-index 4cc15b9..c64f4b4 100644
 --- a/docker/build_scripts/build_env.sh
 +++ b/docker/build_scripts/build_env.sh
-@@ -1,7 +1,8 @@
+@@ -1,8 +1,8 @@
 +# Copyright (c) 2019, NVIDIA CORPORATION. All rights reserved.
  # source me
  
