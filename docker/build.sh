@@ -92,7 +92,7 @@ if [[ "$REBUILD_MANYLINUX" != "NO" || "$(docker images -q ${BASE_NAME} 2> /dev/n
     git checkout 96b47a25673b33c728e49099a3a6b1bf503a18c2 || echo -e "Did you forget to \`git clone --recursive\`? Try this:\n" \
                                                                     "  git submodule sync --recursive && \n" \
                                                                     "  git submodule update --init --recursive && \n"
-    git am ../../docker/0001-An-approximate-manylinux3_${ARCH}.patch
+    patch -p1 < ../../docker/0001-An-approximate-manylinux3_${ARCH}.patch
     PLATFORM=$(uname -m) TRAVIS_COMMIT=latest ./build.sh
     popd
 fi
