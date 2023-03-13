@@ -1,14 +1,14 @@
 #########################################################################################
 ##  Stage 2: build DALI wheels on top of the dependencies image built in Stage 1
 #########################################################################################
-ARG DEPS_IMAGE_NAME
+ARG DEPS_IMAGE_NAME=nvcr.io/nvidia/pytorch:19.05-py3
 # clean builder without source code inside
 FROM ${DEPS_IMAGE_NAME} as builder
 
 ARG PYVER=2.7
 ARG PYV=27
 
-ENV PYVER=${PYVER} PYV=${PYV} PYTHONPATH=/opt/python/v
+ENV PYVER=${PYVER} PYV=${PYV} PYTHONPATH=/usr/bin/python2.7
 
 ENV PYBIN=${PYTHONPATH}/bin \
     PYLIB=${PYTHONPATH}/lib
@@ -17,7 +17,8 @@ ENV PATH=${PYBIN}:${PATH} \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:/opt/dali/${DALI_BUILD_DIR}:${PYLIB}:${LD_LIBRARY_PATH} \
     LIBRARY_PATH=/usr/local/cuda/lib64/stubs:/opt/dali/${DALI_BUILD_DIR}:${PYLIB}:${LIBRARY_PATH}
 
-RUN ln -s /opt/python/cp${PYV}* /opt/python/v
+#RUN yum -y install python27
+RUN apt-get -y install python2.7
 
 RUN pip install future setuptools wheel && \
     rm -rf /root/.cache/pip/
@@ -25,7 +26,10 @@ RUN pip install future setuptools wheel && \
 RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     ldconfig
 
+#COPY /home/yckim/dali_checkfreq/dali ./opt/dali
+
 WORKDIR /opt/dali
+
 
 ARG CC
 ARG CXX
@@ -82,6 +86,7 @@ RUN mkdir /wheelhouse && chmod 0777 /wheelhouse
 
 FROM builder
 COPY . .
+COPY build_helper.sh /opt/dali/docker/build_helper.sh
 
 ARG DALI_BUILD_DIR=build-docker-release
 WORKDIR /opt/dali/${DALI_BUILD_DIR}
