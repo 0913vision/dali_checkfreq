@@ -57,7 +57,7 @@ RUN rm -f /usr/bin/python && \
     else \
         ln -s /usr/bin/python$PYVER /usr/bin/python && \
         ln -s /usr/bin/python$PYVER /usr/bin/python`echo $PYVER | cut -c1-1` && \
-        curl -O https://bootstrap.pypa.io/pip/3.5/get-pip.py && \
+        curl -O https://bootstrap.pypa.io/get-pip.py && \
         python get-pip.py && \
         rm get-pip.py; \
     fi && \
